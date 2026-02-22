@@ -493,7 +493,7 @@ Based on the paper's conclusions, the following extensions are planned:
 
 ---
 
-## � Authors
+## 👥 Authors
 
 | Name | Affiliation | Contact |
 |---|---|---|
@@ -507,15 +507,6 @@ Based on the paper's conclusions, the following extensions are planned:
 ## 📖 Citation
 
 If you use this system or build upon this work, please cite the paper:
-
-```bibtex
-@article{maheshwari2025smartgeocoding,
-  title     = {Smart Location Geocoding using Large Language Models},
-  author    = {Maheshwari, Diya and Vasudevan, Abhinav and Ramudu, Bharathi and Panigrahi, Narayan},
-  year      = {2025},
-  institution = {VIT Chennai and DRDO CAIR Bangalore}
-}
-```
 
 ---
 
