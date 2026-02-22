@@ -1,0 +1,65 @@
+# ── Secrets ───────────────────────────────────────────────────────────────
+.env
+
+# ── Python cache ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ── Virtual environments ───────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+
+# ── Node / npm ────────────────────────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── Large data files (download separately — see README) ──────────────────
+final_training_geocoded.csv
+
+# ── Model weights tracked via Git LFS (.gitattributes) ───────────────────
+# model.safetensors is included — tracked by Git LFS, not excluded
+
+# ── NLTK local data cache ─────────────────────────────────────────────────
+nltk_data/
+backend/nltk_data/
+
+# ── Offline pip wheel cache ───────────────────────────────────────────────
+wheelhouse/
+
+# ── macOS artefacts ───────────────────────────────────────────────────────
+__MACOSX/
+.DS_Store
+
+# ── Logs and runtime output ───────────────────────────────────────────────
+*.log
+integrated_debug.log
+log.txt
+
+# ── Evaluation / scratch CSVs (not needed by end users) ──────────────────
+geocoding_eval_results.csv
+model_eval_output.csv
+model_evaluation_summary.csv
+synthetic_data_test.csv
+clean_locations.csv
+
+# ── Old / superseded files ────────────────────────────────────────────────
+app.py
+saved_codes.py
+save_codes_new.py
+READ_ME_TO_RUN.md
+help.txt
+blah/
+frontend/
+
+# ── Utility / setup scripts not needed by repo consumers ─────────────────
+Download_imports.py
+download_missing_wheels.py
+download_nltk_resources.py
+download_wheels.py
+Install_imports.py
+check_versions.py
+checkversions.py
