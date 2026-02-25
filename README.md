@@ -10,8 +10,9 @@
 [![LLaMA 3](https://img.shields.io/badge/LLM-LLaMA%203-purple?logo=meta&logoColor=white)](https://ollama.com/library/llama3)
 [![spaCy](https://img.shields.io/badge/spaCy-3.x-09a3d5?logo=spacy&logoColor=white)](https://spacy.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![IEEE Paper](https://img.shields.io/badge/IEEE-Paper-00629B?logo=ieee&logoColor=white)](https://ieeexplore.ieee.org/document/11399126)
 
-*Published research — Diya Maheshwari · Abhinav Vasudevan · Bharathi Ramudu · Narayan Panigrahi*  
+*Published research — [Diya Maheshwari · Abhinav Vasudevan · Bharathi Ramudu · Narayan Panigrahi](https://ieeexplore.ieee.org/document/11399126)*  
 *VIT Chennai · DRDO CAIR Bangalore*
 
 </div>
@@ -67,7 +68,7 @@ The system processes any noisy input and returns:
 
 ## 🏗️ Architecture
 
-![System Architecture](Picture1.png)
+![System Architecture](assets/Picture1.png)
 
 ### Routing Decision Tree
 
@@ -102,24 +103,31 @@ The system processes any noisy input and returns:
 
 ```
 Auto_correct_address/
-├── integrated.py                 # Central routing engine (T5 vs LLaMA3 vs direct)
-├── T5_fine_tuned.py              # T5 model inference + geocoding
-├── Context_mapping_LLAMA3.py     # LLaMA3 contextual inference + geocoding
-├── train_t5.ipynb                # 🔁 Re-training notebook (Google Colab, run top-to-bottom)
-├── backend/
-│   └── main.py                   # FastAPI REST API server
-├── t5_corrector_final/           # Fine-tuned T5 model weights
-│   ├── model.safetensors         # Tracked via Git LFS (231 MB)
-│   ├── spiece.model
-│   ├── config.json
-│   └── ...
-├── IN.txt                        # GeoNames India locations (~600K entries, 66 MB)
-├── admin1CodesASCII.txt          # State-level admin codes
-├── admin2Codes.txt               # District-level admin codes
-├── final_training_geocoded.csv   # ⚠️ Not in repo (73 MB) — training data only
-├── .gitattributes                # Git LFS tracking rules
-├── .env.example                  # Environment variable template (copy → .env)
-├── requirements.txt              # Python dependencies
+├── src/
+│   ├── integrated.py             # Central routing engine (T5 vs LLaMA3 vs direct)
+│   ├── T5_fine_tuned.py          # T5 model inference + geocoding
+│   └── Context_mapping_LLAMA3.py # LLaMA3 contextual inference + geocoding
+├── models/
+│   └── t5_corrector_final/       # Fine-tuned T5 model weights
+│       ├── model.safetensors     # Tracked via Git LFS (231 MB)
+│       ├── spiece.model
+│       ├── config.json
+│       └── ...
+├── data/
+│   ├── IN.txt                    # GeoNames India locations (~600K entries, 66 MB)
+│   ├── admin1CodesASCII.txt      # State-level admin codes
+│   └── admin2Codes.txt           # District-level admin codes
+├── notebooks/
+│   ├── train_t5.ipynb            # Re-training notebook (Google Colab)
+│   └── train_t5.py               # Standalone training script
+├── tests/
+│   ├── Test cases.csv
+│   └── Test_cases_with_route.csv
+├── assets/
+│   └── Picture1.png              # System architecture diagram
+├── .gitattributes
+├── .env.example
+├── requirements.txt
 └── README.md
 ```
 
@@ -131,8 +139,8 @@ Large files are included in the repo but require **Git LFS**:
 
 | File | Size | Notes |
 |---|---|---|
-| `t5_corrector_final/model.safetensors` | ~231 MB | Tracked via Git LFS |
-| `IN.txt` | ~66 MB | GeoNames India dump — included directly |
+| `models/t5_corrector_final/model.safetensors` | ~231 MB | Tracked via Git LFS |
+| `data/IN.txt` | ~66 MB | GeoNames India dump — included directly |
 
 When cloning, Git LFS must be installed for the model weights to download correctly:
 
@@ -257,16 +265,16 @@ The FastAPI server starts at `http://localhost:5000`. Interactive docs are avail
 
 ```bash
 # Short input → T5
-python integrated.py "blr"
+python src/integrated.py "blr"
 
 # Contextual input → LLaMA3
-python integrated.py "I visited the Taj in Agra last week"
+python src/integrated.py "I visited the Taj in Agra last week"
 
 # Ambiguous city → LLaMA3 with disambiguation
-python integrated.py "Udaipur"
+python src/integrated.py "Udaipur"
 
 # Direct match → instant geocode
-python integrated.py "Chennai"
+python src/integrated.py "Chennai"
 ```
 
 ---
@@ -329,8 +337,8 @@ Liveness probe.
 - **Overfitting prevention:** Stratified sampling across states, data augmentation (mild + heavy noise), T5 built-in dropout, early stopping.
 - **Training scope:** Fine-tuned on Indian data as an experiment, but the model **can generalise to other regions** with equivalent training data from [GeoNames.org](https://www.geonames.org/countries/).
 - **Inference:** CPU-based, ~0.5–2 s per query after warm-up.
-- **Weights:** Stored locally in `t5_corrector_final/` (`model.safetensors`, `spiece.model`, `tokenizer_config.json`).
-- **Re-training:** Use [`train_t5.ipynb`](train_t5.ipynb) — a self-contained Google Colab notebook that re-trains from a fresh `t5-small` checkpoint. Upload `final_training_geocoded.csv` to Google Drive, open the notebook in Colab, set runtime to **T4 GPU**, and run all cells. The trained model is saved back to Drive as a drop-in replacement for `t5_corrector_final/`.
+- **Weights:** Stored locally in `models/t5_corrector_final/` (`model.safetensors`, `spiece.model`, `tokenizer_config.json`).
+- **Re-training:** Use [`notebooks/train_t5.ipynb`](notebooks/train_t5.ipynb) — a self-contained Google Colab notebook that re-trains from a fresh `t5-small` checkpoint. Upload `data/final_training_geocoded.csv` to Google Drive, open the notebook in Colab, set runtime to **T4 GPU**, and run all cells. The trained model is saved back to Drive as a drop-in replacement for `models/t5_corrector_final/`.
 
 ### LLaMA 3 (via Ollama)
 
@@ -351,10 +359,10 @@ Liveness probe.
 
 | File | Source | Records | Description |
 |---|---|---|---|
-| `IN.txt` | [GeoNames](https://www.geonames.org/) | ~6 lakh (600K) | All Indian place names with `name`, `latitude`, `longitude`, `feature_class`, and admin codes |
-| `admin1CodesASCII.txt` | GeoNames | — | State-level administrative codes and names |
-| `admin2Codes.txt` | GeoNames | — | District-level administrative codes and names |
-| `final_training_geocoded.csv` | Synthetic (custom) | 500K+ | Noisy-to-correct training pairs: `noisy_location`, `correct_location`, `state`, `district`, `latitude`, `longitude` |
+| `data/IN.txt` | [GeoNames](https://www.geonames.org/) | ~6 lakh (600K) | All Indian place names with `name`, `latitude`, `longitude`, `feature_class`, and admin codes |
+| `data/admin1CodesASCII.txt` | GeoNames | — | State-level administrative codes and names |
+| `data/admin2Codes.txt` | GeoNames | — | District-level administrative codes and names |
+| `data/final_training_geocoded.csv` | Synthetic (custom) | 500K+ | Noisy-to-correct training pairs: `noisy_location`, `correct_location`, `state`, `district`, `latitude`, `longitude` |
 
 ### Synthetic Dataset Generation
 
@@ -437,7 +445,7 @@ Evaluated on **2,000 synthetically generated test samples** emulating real-world
 
 ### Database
 
-Edit `DB_CONFIG` in `T5_fine_tuned.py` and `Context_mapping_LLAMA3.py`:
+Edit `DB_CONFIG` in [`src/T5_fine_tuned.py`](src/T5_fine_tuned.py) and [`src/Context_mapping_LLAMA3.py`](src/Context_mapping_LLAMA3.py):
 
 ```python
 DB_CONFIG = {
@@ -451,7 +459,7 @@ DB_CONFIG = {
 
 ### Ollama Endpoint
 
-In `Context_mapping_LLAMA3.py`:
+In [`src/Context_mapping_LLAMA3.py`](src/Context_mapping_LLAMA3.py):
 
 ```python
 OLLAMA_URL = "http://localhost:11434/api/generate"
@@ -508,6 +516,27 @@ Based on the paper's conclusions, the following extensions are planned:
 
 If you use this system or build upon this work, please cite the paper:
 
+```
+D. Maheshwari, A. Vasudevan, B. Ramudu and N. Panigrahi, "Smart Location Geocoding using Large Language Models," 2025 IEEE 9th International Conference on Information and Communication Technology (CICT), Chennai, India, 2025, pp. 1-6, doi: 10.1109/CICT67193.2025.11399126.
+```
+
+**BibTeX:**
+
+```bibtex
+@INPROCEEDINGS{11399126,
+  author={Maheshwari, Diya and Vasudevan, Abhinav and Ramudu, Bharathi and Panigrahi, Narayan},
+  booktitle={2025 IEEE 9th International Conference on Information and Communication Technology (CICT)}, 
+  title={Smart Location Geocoding using Large Language Models}, 
+  year={2025},
+  volume={},
+  number={},
+  pages={1-6},
+  keywords={Filtering;Large language models;Semantics;Transforms;Transformers;Spatial databases;Information and communication technology;Geospatial analysis;Noise measurement;Spatial resolution;Geocoding;Transformer;POS-based Extraction;Lexical Normalization;Semantics;Fuzzy Matching},
+  doi={10.1109/CICT67193.2025.11399126}}
+```
+
+**Paper Link:** [IEEE Xplore](https://ieeexplore.ieee.org/document/11399126)
+
 ---
 
 ## 📚 Related Work
@@ -529,7 +558,7 @@ This project builds on ideas and tools from the following open-source projects a
 
 ### Key Papers Referenced
 
-- **Maheshwari et al. (2025).** *Smart Location Geocoding using Large Language Models.* VIT Chennai & DRDO CAIR Bangalore.
+- **Maheshwari, D., Vasudevan, A., Ramudu, B., & Panigrahi, N. (2025).** *Smart Location Geocoding using Large Language Models.* 2025 IEEE 9th International Conference on Information and Communication Technology (CICT), pp. 1-6. [doi:10.1109/CICT67193.2025.11399126](https://ieeexplore.ieee.org/document/11399126)
 - **Raffel et al. (2020).** *Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer.* JMLR 21(140). [arXiv:1910.10683](https://arxiv.org/abs/1910.10683)
 - **Touvron et al. (2023).** *LLaMA: Open and Efficient Foundation Language Models.* [arXiv:2302.13971](https://arxiv.org/abs/2302.13971)
 - **Kudo & Richardson (2018).** *SentencePiece: A simple and language independent subword tokenizer and detokenizer for neural text processing.* [arXiv:1808.06226](https://arxiv.org/abs/1808.06226)
